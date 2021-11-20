@@ -1,0 +1,13 @@
+
+static way:
+# https://stackoverflow.com/questions/31770604/how-to-generate-statically-linked-executables
+# https://github.com/rust-lang/rust/pull/77386/
+
+Add this to your .cargo/config file, using the appropriate target triple for your platform:
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+cargo build --release --target x86_64-unknown-linux-gnu  
+
+
