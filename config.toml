@@ -9,9 +9,10 @@ pattern = ""
 # WAIT_FOR_REPLACE_OFFSET
 offset = ""
 # WAIT_FOR_REPLACE_BADCHARS_VAR
+# specify bad char in python2 byte format
 badchar = ""
 # WAIT_FOR_REPLACE_JMP_ADDRESS
 jmpaddress = ""
 # WAIT_FOR_REPLACE_SHELL_FILE
-jmpaddress = ""
+shellfile = ""
 
