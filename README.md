@@ -31,7 +31,7 @@ Added generate python script script
 **Required**
 - Step 1 or ip, port, prefix
 - Step 3 or offset
-- badchars
+- badchar
 
 ## Step 5 generate verify jmp address script
 

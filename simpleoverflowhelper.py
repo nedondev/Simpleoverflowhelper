@@ -59,7 +59,7 @@ def gen1():
     
     autoupdate_config()
     
-    os.chmod(filename, 777)
+    os.chmod(filename, 0o777)
 
     print("You might want to run after the sctipt command: ")
     print("./" + filename)
@@ -85,14 +85,12 @@ def gen2():
     
     autoupdate_config()
     
-    os.chmod(filename, 777)
+    os.chmod(filename, 0o777)
 
     print("You might want to run after the sctipt command: ")
     print("./" + filename)
-    print("./2-offset.py")
-    print("./2-offset.py")
     print("/usr/share/metasploit-framework/tools/exploit/pattern_offset.rb -l $crashed_byte -q $overwritten_eip_pattern")
-    print("./simpleoverflowhelper.py 3 -g $offset")
+    print("./simpleoverflowhelper.py 3 --offset $offset")
     pass
 
 def gen3():
@@ -113,14 +111,14 @@ def gen3():
     
     autoupdate_config()
     
-    os.chmod(filename, 777)
+    os.chmod(filename, 0o777)
 
     print("You might want to run after the sctipt command: ")
     print("./" + filename)
     print("./3-verify-overwritten.py")
     print("./simpleoverflowhelper.py 4 -b \"\"")
-    print("./simpleoverflowhelper.py 4 -b \"\\x00\"")
-    print("./simpleoverflowhelper.py 4 -b \"\\x00\\x0a\"")
+    print("./simpleoverflowhelper.py 4 -b \"0\"")
+    print("./simpleoverflowhelper.py 4 -b \"0,a\"")
     pass
 
 def gen4():
@@ -141,7 +139,7 @@ def gen4():
     
     autoupdate_config()
     
-    os.chmod(filename, 777)
+    os.chmod(filename, 0o777)
 
     print("You might want to run after the sctipt command: ")
     print("./" + filename)
@@ -170,7 +168,7 @@ def gen5():
     
     autoupdate_config()
     
-    os.chmod(filename, 777)
+    os.chmod(filename, 0o777)
 
     print("You might want to run after the sctipt command: ")
     print("./" + filename)
@@ -199,14 +197,14 @@ def gen6():
     
     autoupdate_config()
     
-    os.chmod(filename, 777)
+    os.chmod(filename, 0o777)
 
     print("You might want to run after the sctipt command: ")
     print("./" + filename)
     pass
 
 def main():
-    config = None
+    config = {'host': '', 'port': '', 'prefix': '', 'pattern': '', 'offset': '', 'badchar': '', 'jmpaddress': '', 'shellfile': ''}
     if os.path.isfile(os.path.join(os.getcwd(), 'config.toml')): 
         config = toml.load(os.path.join(os.getcwd(), 'config.toml'))
 
@@ -218,7 +216,7 @@ def main():
     parser.add_argument('-p', '--port', action='store', type=int, help='The vulnerable to bufferoverflow service port (e.g. 9999)')
     parser.add_argument('-r', '--prefix', action='store', type=str, help='The bufferoverflow prefix before send value to actual vulnerable input field (e.g. "TRUN ")')
     parser.add_argument('-g', '--pattern', action='store', type=str, help='The generated pattern from msf pattern_create.rb (e.g. Aa0Aa1Aa2Aa3Aa4Aa5Aa)')
-    parser.add_argument('-b', '--badchar', action='store', type=int, help='The bufferoverflow step (e.g. \\x00,\0x0a')
+    parser.add_argument('-b', '--badchar', action='store', type=str, help='The bufferoverflow step (e.g. 0,a)')
     parser.add_argument('--offset', action='store', type=str, help='The bufferoverflow step payload offset before replace the EIP regeister value. (e.g. 2003)')
     parser.add_argument('-j', '--jmpaddress', action='store', type=str, help='The bufferoverflow jump to esp address (e.g. 65459201)')
     parser.add_argument('-s', '--shellfile', action='store', type=str, help='A filename contain the reverse shell code generated from msfvenom. (e.g. reverseshell.txt)')
@@ -250,58 +248,132 @@ def main():
         simpleoverflowhelper.config["output"] = args.output
 
     if args.generatestep == 1:
-        if args.host and args.port and args.prefix:
+        if not (args.host is None) and not (args.port is None) and not (args.prefix is None):
             simpleoverflowhelper.config["host"] = args.host
             simpleoverflowhelper.config["port"] = args.port
             simpleoverflowhelper.config["prefix"] = args.prefix
-            
         elif  config["host"] != "" and config["port"] != "" :
             pass
         else:
-            # add warning for each step requirement
+            print("Err: Not found any configuration to generate script")
             parser.print_help()
             sys.exit(0)
         gen1()
             
     elif args.generatestep == 2:
-        if not args.host and not args.port and not args.prefix:
-            gen1()        
+        # check previous step configuration
+        # todo: change to -> can config some value without have to provide already in config file
+        # todo: add warning which argument not provide or have wrong format
+        if args.host and args.port and args.prefix:
+            simpleoverflowhelper.config["host"] = args.host
+            simpleoverflowhelper.config["port"] = args.port
+            simpleoverflowhelper.config["prefix"] = args.prefix
+        elif  config["host"] == "" or config["port"] == "" :
+            print("Somehow config from previous had been lost")
+            sys.exit(0)
+        # check current step configuration
+        if not (args.pattern is None):
+            simpleoverflowhelper.config["pattern"] = args.pattern
+        elif  config["pattern"] != "":
+            pass
         else:
-            # add warning for each step requirement
+            print("Err: Not found any configuration to generate script")
             parser.print_help()
             sys.exit(0)
+        gen2()
 
     elif args.generatestep == 3:
-        if not args.host and not args.port and not args.prefix:
-            gen1()        
+        # check previous step configuration
+        # todo: change to can config some value without have to provide already in config file
+        # todo: add warning which argument not provide or have wrong format
+        if args.host and args.port and args.prefix:
+            simpleoverflowhelper.config["host"] = args.host
+            simpleoverflowhelper.config["port"] = args.port
+            simpleoverflowhelper.config["prefix"] = args.prefix
+        elif  config["host"] == "" or config["port"] == "" :
+            print("Somehow config from previous had been lost")
+            sys.exit(0)
+        # check current step configuration
+        if not (args.offset is None):
+            simpleoverflowhelper.config["offset"] = args.offset
+        elif  config["offset"] != "":
+            pass
         else:
-            # add warning for each step requirement
+            print("Err: Not found any configuration to generate script")
             parser.print_help()
             sys.exit(0)
+        gen3()
 
     elif args.generatestep == 4:
-        if not args.host and not args.port and not args.prefix:
-            gen1()        
+        # check previous step configuration
+        # todo: change to can config some value without have to provide already in config file
+        # todo: add warning which argument not provide or have wrong format
+        if args.host and args.port and args.prefix and args.offset:
+            simpleoverflowhelper.config["host"] = args.host
+            simpleoverflowhelper.config["port"] = args.port
+            simpleoverflowhelper.config["prefix"] = args.prefix
+            simpleoverflowhelper.config["offset"] = args.offset
+        elif  config["host"] == "" or config["port"] == "" or config["offset"] == "" :
+            print("Somehow config from previous had been lost")
+            sys.exit(0)
+        # check current step configuration
+        if not (args.badchar is None):
+            simpleoverflowhelper.config["badchar"] = args.badchar
+        elif  config["badchar"] != "":
+            pass
         else:
-            # add warning for each step requirement
+            print("Err: Not found any configuration to generate script")
             parser.print_help()
             sys.exit(0)
+        gen4()
 
     elif args.generatestep == 5:
-        if not args.host and not args.port and not args.prefix:
-            gen1()        
+        # check previous step configuration
+        # todo: change to can config some value without have to provide already in config file
+        # todo: add warning which argument not provide or have wrong format
+        if args.host and args.port and args.prefix and args.offset:
+            simpleoverflowhelper.config["host"] = args.host
+            simpleoverflowhelper.config["port"] = args.port
+            simpleoverflowhelper.config["prefix"] = args.prefix
+            simpleoverflowhelper.config["offset"] = args.offset
+        elif  config["host"] == "" or config["port"] == "" or config["offset"] == "" :
+            print("Somehow config from previous had been lost")
+            sys.exit(0)
+        # check current step configuration
+        if not (args.jmpaddress is None):
+            simpleoverflowhelper.config["jmpaddress"] = args.jmpaddress
+        elif  config["jmpaddress"] != "":
+            pass
         else:
-            # add warning for each step requirement
+            print("Err: Not found any configuration to generate script")
             parser.print_help()
             sys.exit(0)
+        gen5()
 
     elif args.generatestep == 6:
-        if not args.host and not args.port and not args.prefix:
-            gen1()        
+        # check previous step configuration
+        # todo: change to can config some value without have to provide already in config file
+        # todo: add warning which argument not provide or have wrong format
+        if args.host and args.port and args.prefix and args.offset and args.jmpaddress:
+            simpleoverflowhelper.config["host"] = args.host
+            simpleoverflowhelper.config["port"] = args.port
+            simpleoverflowhelper.config["prefix"] = args.prefix
+            simpleoverflowhelper.config["offset"] = args.offset
+            simpleoverflowhelper.config["jmpaddress"] = args.jmpaddress
+        elif config["host"] == "" or config["port"] == "" or config["offset"] == "" or config["jmpaddress"] == "":
+            print("Somehow config from previous had been lost")
+            sys.exit(0)
+        # check current step configuration
+        if not (args.shellfile is None):
+            simpleoverflowhelper.config["shellfile"] = args.shellfile
+        elif  config["shellfile"] != "":
+            pass
         else:
-            # add warning for each step requirement
+            print("Err: Not found any configuration to generate script")
             parser.print_help()
             sys.exit(0)
+        gen6()
+
     else:
         parser.print_help()
         sys.exit(0)
