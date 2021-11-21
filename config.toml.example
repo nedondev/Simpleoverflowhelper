@@ -1,0 +1,18 @@
+# WAIT_FOR_REPLACE_IP
+host = ""
+# WAIT_FOR_REPLACE_PORT
+port = ""
+# WAIT_FOR_REPLACE_PREFIX
+prefix = ""
+# WAIT_FOR_REPLACE_GENERATED_PATTERN
+pattern = ""
+# WAIT_FOR_REPLACE_OFFSET
+offset = ""
+# WAIT_FOR_REPLACE_BADCHARS_VAR
+# specify bad char in python2 byte format
+badchar = ""
+# WAIT_FOR_REPLACE_JMP_ADDRESS
+jmpaddress = ""
+# WAIT_FOR_REPLACE_SHELL_FILE
+shellfile = ""
+
