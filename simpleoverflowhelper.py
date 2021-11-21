@@ -234,6 +234,7 @@ def main():
         if '--help' in unknown:
             parser.print_help()
             print()
+            sys.exit(0)
 
     unknown_help()
     # print(args)
