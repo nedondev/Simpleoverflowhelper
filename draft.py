@@ -20,13 +20,70 @@ import argparse, os, sys, toml
 
 VERSION = "0.0.1"
 
+class Simpleoverflowhelper:
+    def __init__(self):
+        self.config = None
+        self.argparse = None
+
+simpleoverflowhelper = Simpleoverflowhelper()
+
+def autoupdate_config():
+    config = {}
+    config["host"] = simpleoverflowhelper.config["host"]
+    config["port"] = simpleoverflowhelper.config["port"]
+    config["prefix"] = simpleoverflowhelper.config["prefix"]
+    config["pattern"] = simpleoverflowhelper.config["pattern"]
+    config["offset"] = simpleoverflowhelper.config["offset"]
+    config["badchar"] = simpleoverflowhelper.config["badchar"]
+    config["jmpaddress"] = simpleoverflowhelper.config["jmpaddress"]
+    config["shellfile"] = simpleoverflowhelper.config["shellfile"]
+    # print(config, os.path.join(os.getcwd(), 'config.toml'))
+    with open(os.path.join(os.getcwd(), 'config.toml'), 'w') as fw:
+        toml.dump(config, fw)
+
+def gen1():
+    filename = "1-fuzzer.py"
+    template_filename = "1-fuzzer-template.py"
+    if "output" in  simpleoverflowhelper.config:
+        filename = simpleoverflowhelper.config["output"]
+    fw = open(filename, 'w')
+    fr = open(template_filename, 'r')
+    template_lines = fr.readlines()
+    for line in template_lines:
+        line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
+        line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
+        line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
+        fw.write(line)
+    fw.close()
+    fr.close()
+    
+    autoupdate_config()
+    pass
+
+def gen2():
+    pass
+
+def gen3():
+    pass
+
+def gen4():
+    pass
+
+def gen5():
+    pass
+
+def gen6():
+    pass
+
 def main():
     config = None
     if os.path.isfile(os.path.join(os.getcwd(), 'config.toml')): 
-        config = toml.load("config.toml")
+        config = toml.load(os.path.join(os.getcwd(), 'config.toml'))
+
+    simpleoverflowhelper.config = config
     
-    parser = argparse.ArgumentParser(add_help=False, description='Basic Bufferoverflow value repaster and suggesster.Instead of have to repaste command output, ip, port, etc this tool do it for you and also suggest next step to do.')
-    parser.add_argument('generate-step', action='store', type=int, help='The bufferoverflow step (e.g. 1)', nargs='*')
+    parser = argparse.ArgumentParser(add_help=False, description='Basic Bufferoverflow value repaster and suggesster.Instead of have to repaste an command output, ip, port, etc. This tool do it for you and also suggest next step to do.')
+    parser.add_argument('generatestep', action='store', type=int, help='The bufferoverflow step (e.g. 1)', nargs='?')
     parser.add_argument('-h', '--host', action='store', help='IP addresses of target host (e.g. 10.0.0.1)')
     parser.add_argument('-p', '--port', action='store', type=int, help='The vulnerable to bufferoverflow service port (e.g. 9999)')
     parser.add_argument('-r', '--prefix', action='store', type=str, help='The bufferoverflow prefix before send value to actual vulnerable input field (e.g. "TRUN ")')
@@ -34,11 +91,13 @@ def main():
     parser.add_argument('-b', '--badchar', action='store', type=int, help='The bufferoverflow step (e.g. \\x00,\0x0a')
     parser.add_argument('--offset', action='store', type=str, help='The bufferoverflow step payload offset before replace the EIP regeister value. (e.g. 2003)')
     parser.add_argument('-j', '--jmpaddress', action='store', type=str, help='The bufferoverflow jump to esp address (e.g. 65459201)')
-    parser.add_argument('-s', '--shell-file', action='store', type=str, help='A filename contain the reverse shell code generated from msfvenom. (e.g. reverseshell.txt)')
+    parser.add_argument('-s', '--shellfile', action='store', type=str, help='A filename contain the reverse shell code generated from msfvenom. (e.g. reverseshell.txt)')
     parser.add_argument('-o', '--output', action='store', type=str, help='Specify output file name. If not specified will be the template file name without template word. (e.g. 1-fuzzer.py)')
     parser.add_argument('--version', action='store_true', help='Prints the Simple Overflow Helper version and exits.')
     args, unknown = parser.parse_known_args()
 
+    simpleoverflowhelper.argparse = parser
+    
     if args.version:
         print('Simple Overflow Helper v' + VERSION)
         sys.exit(0)
@@ -49,6 +108,73 @@ def main():
             print()
 
     unknown_help()
+    # print(args)
+    
+    if not args.generatestep:
+        parser.print_help()
+        sys.exit(0)
+    
+    # print(config)
+
+    if args.output:
+        simpleoverflowhelper.config["output"] = args.output
+
+    if args.generatestep == 1:
+        if args.host and args.port and args.prefix:
+            simpleoverflowhelper.config["host"] = args.host
+            simpleoverflowhelper.config["port"] = args.port
+            simpleoverflowhelper.config["prefix"] = args.prefix
+            
+        elif  config["host"] != "" and config["port"] != "" :
+            pass
+        else:
+            # add warning for each step requirement
+            parser.print_help()
+            sys.exit(0)
+        gen1()
+            
+    elif args.generatestep == 2:
+        if not args.host and not args.port and not args.prefix:
+            gen1()        
+        else:
+            # add warning for each step requirement
+            parser.print_help()
+            sys.exit(0)
+
+    elif args.generatestep == 3:
+        if not args.host and not args.port and not args.prefix:
+            gen1()        
+        else:
+            # add warning for each step requirement
+            parser.print_help()
+            sys.exit(0)
+
+    elif args.generatestep == 4:
+        if not args.host and not args.port and not args.prefix:
+            gen1()        
+        else:
+            # add warning for each step requirement
+            parser.print_help()
+            sys.exit(0)
+
+    elif args.generatestep == 5:
+        if not args.host and not args.port and not args.prefix:
+            gen1()        
+        else:
+            # add warning for each step requirement
+            parser.print_help()
+            sys.exit(0)
+
+    elif args.generatestep == 6:
+        if not args.host and not args.port and not args.prefix:
+            gen1()        
+        else:
+            # add warning for each step requirement
+            parser.print_help()
+            sys.exit(0)
+    else:
+        parser.print_help()
+        sys.exit(0)
 
 if __name__ == '__main__':
 	main()

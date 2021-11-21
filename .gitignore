@@ -1,0 +1,11 @@
+# Clear generated or manual config file
+config.toml
+1-fuzzer.py
+2-offset.py
+3-verify-overwritten.py
+4-find-badchars.py
+5-verifiy-jmp-pointer.py
+6-get-reverse-shell.py
+
+# Clear cache file
+*.swp
