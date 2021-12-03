@@ -6,19 +6,7 @@ import argparse, os, sys, toml
 
 # TODO
 
-## read argument value
-## read toml config file
-
-## check the argument for specific generate script
-## if the argument not fit the script check the config file 
-
-## add suggest for next command
-
-# code
-
-## read arguments
-
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 class Simpleoverflowhelper:
     def __init__(self):
