@@ -6,7 +6,7 @@ import argparse, os, sys, toml
 
 # TODO
 
-VERSION = "0.0.2"
+VERSION = "0.0.3"
 
 class Simpleoverflowhelper:
     def __init__(self):
@@ -63,11 +63,20 @@ def gen2():
     fw = open(filename, 'w')
     fr = open(template_filename, 'r')
     template_lines = fr.readlines()
+
+    pattern = ""
+    pattern_len = len(simpleoverflowhelper.config["pattern"])
+    for i in range(0, pattern_len, 64):
+        if i+64 < pattern_len:
+            pattern += simpleoverflowhelper.config["pattern"][i:i+64]+"\\\n"
+        else:
+            pattern += simpleoverflowhelper.config["pattern"][i:pattern_len - 1 ]
+        
     for line in template_lines:
         line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
         line = line.replace("WAIT_FOR_REPLACE_PORT", str(simpleoverflowhelper.config["port"]))
         line = line.replace("WAIT_FOR_REPLACE_PREFIX", simpleoverflowhelper.config["prefix"])
-        line = line.replace("WAIT_FOR_REPLACE_GENERATED_PATTERN", simpleoverflowhelper.config["pattern"])
+        line = line.replace("WAIT_FOR_REPLACE_GENERATED_PATTERN", pattern)
         fw.write(line)
     fw.close()
     fr.close()
