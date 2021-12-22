@@ -119,7 +119,7 @@ def gen3():
     print("./simpleoverflowhelper.py 4 -b \"0\"")
     print("./simpleoverflowhelper.py 4 -b \"0,a\"")
     print("!mona config -set workingfolder c:\\mona\\%p")
-    print("!mona bytearray -b \"\x00\"")
+    print("!mona bytearray -b \"\\x00\"")
     print("!mona compare -f C:\\mona\\malbec\\bytearray.bin -a <start-esp>")
     pass
 
