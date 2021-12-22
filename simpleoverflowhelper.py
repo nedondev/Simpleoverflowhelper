@@ -70,7 +70,7 @@ def gen2():
         if i+64 < pattern_len:
             pattern += simpleoverflowhelper.config["pattern"][i:i+64]+"\\\n"
         else:
-            pattern += simpleoverflowhelper.config["pattern"][i:pattern_len - 1 ]
+            pattern += simpleoverflowhelper.config["pattern"][i:pattern_len]
         
     for line in template_lines:
         line = line.replace("WAIT_FOR_REPLACE_IP", simpleoverflowhelper.config["host"])
